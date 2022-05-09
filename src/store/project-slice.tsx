@@ -1,16 +1,16 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 import Class from '../types/class';
 import Student from '../types/student';
 
 interface ProjectState {
-	loggedIn: boolean;
+	isLoggedIn: boolean;
 	currentStudent: Student | undefined;
 	classes: Class[];
 }
 
 const initialProjectState: ProjectState = {
-	loggedIn: false,
+	isLoggedIn: false,
 	currentStudent: undefined,
 	classes: [],
 };
@@ -20,9 +20,11 @@ const projectSlice = createSlice({
 	initialState: initialProjectState,
 	reducers: {
 		IS_LOGGED_IN(state) {
-			state.loggedIn = !state.loggedIn;
+			state.isLoggedIn = !state.isLoggedIn;
 		},
 	},
 });
 
 export const projectActions = projectSlice.actions;
+
+export default projectSlice;
