@@ -1,0 +1,18 @@
+.class-detail {
+	font-size: 1rem;
+	display: flex;
+	flex-direction: column;
+	width: 20vw;
+	border: 0.5px solid black;
+	border-radius: 3px;
+	padding: 0.5rem;
+}
+
+.class-detail__heading {
+	font-weight: bold;
+}
+
+.class-detail__heading,
+.class-detail__item {
+	padding: 0.3rem;
+}

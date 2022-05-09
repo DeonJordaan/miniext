@@ -1,0 +1,9 @@
+.login {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.login button {
+	margin: 1rem auto;
+}
