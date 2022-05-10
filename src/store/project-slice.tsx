@@ -30,21 +30,40 @@ const projectSlice = createSlice({
 
 export const fetchStudentData = (student: string) => {
 	return async (dispatch: any) => {
-		const getData = async () => {
+		const getStudentData = async () => {
 			const Airtable = require('airtable');
-			const base = new Airtable({ apiKey: 'key77sp9vu5c2gXDc' }).base(
-				'app8ZbcPx7dkpOnP0'
-			);
+
+			const base = new Airtable({
+				apiKey: process.env.REACT_APP_AIRTABLE_API_KEY,
+			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
 
 			const studentName = student;
+
 			console.log(typeof studentName);
+
 			const studentData = await base('Students')
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
 
 			console.log(studentData);
+
+			const extractStudentData = studentData.map((data: any) => {
+				return {
+					name: data.fields.Name,
+					classes: data.fields.Classes,
+				};
+			});
+
+			return extractStudentData;
 		};
-		getData();
+
+		try {
+			const student = await getStudentData();
+			dispatch(projectSlice.actions.SET_CURRENT_STUDENT(student));
+			console.log(student);
+		} catch (error) {
+			console.log(error);
+		}
 	};
 };
 
