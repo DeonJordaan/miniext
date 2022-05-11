@@ -1,5 +1,6 @@
 interface Class {
-	name: string;
+	classId: string;
+	classCode: string;
 	students: string[];
 }
 

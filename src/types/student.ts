@@ -1,6 +1,6 @@
 interface Student {
 	name: string;
-	classes: string[];
+	studentClasses: string[];
 }
 
 export default Student;

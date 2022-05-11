@@ -23,7 +23,7 @@ const FetchAirtable = () => {
 
 				const base = new Airtable({
 					apiKey: requestConfig.apiKey,
-				}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
+				}).base(requestConfig.baseId);
 
 				const queryData = requestConfig.queryData;
 				const queryField = requestConfig.queryField;
