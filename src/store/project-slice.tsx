@@ -8,7 +8,7 @@ interface ProjectState {
 	currentStudent: Student[];
 	classesToFetch: string[];
 	studentClasses: Class[];
-	studentsToFetch: string[];
+	studentsData: Student[];
 	//TODO Class & its students names
 }
 
@@ -17,7 +17,7 @@ const initialProjectState: ProjectState = {
 	currentStudent: [],
 	classesToFetch: [],
 	studentClasses: [],
-	studentsToFetch: [],
+	studentsData: [],
 };
 
 const projectSlice = createSlice({
@@ -36,9 +36,14 @@ const projectSlice = createSlice({
 		SET_STUDENT_CLASSES(state, action) {
 			state.studentClasses = action.payload;
 		},
+		SET_STUDENTS_DATA(state, action) {
+			state.studentsData = action.payload;
+		},
 	},
 });
 
+// FIXME TESTING THE NAME 'JOE JAMES RESULTED IN THE QUERY RETURNING RESULTS FOR BOTH HE AND 'JOE'
+// TODO...COULD I USE FIND IN THIS WAY TO FIND ALL MY CLASSES...? MUST TEST
 export const fetchStudentData = (student: string) => {
 	return async (dispatch: any) => {
 		const getStudentData = async () => {
@@ -72,6 +77,8 @@ export const fetchStudentData = (student: string) => {
 					fetchedStudent[0].studentClasses
 				)
 			);
+			console.log(fetchedStudent);
+			console.log(fetchedStudent[0].studentClasses);
 			// fetchClassData();
 		} catch (error) {
 			console.log(error);
@@ -82,7 +89,6 @@ export const fetchStudentData = (student: string) => {
 export const fetchClassData = (arrayOfClassIds: string[]) => {
 	return async (dispatch: any) => {
 		const getClassData = async () => {
-			console.log(arrayOfClassIds);
 			const Airtable = require('airtable');
 
 			const base = new Airtable({
@@ -90,23 +96,52 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
 
 			const classIds = arrayOfClassIds;
+			console.log(classIds);
 
 			let arrayOfFilterFormulas: string[] = [];
 
-			if (classIds) {
-				classIds.forEach((id) => {
-					arrayOfFilterFormulas.push(`Name = ${id}`);
-				});
-			}
+			// CMNT THIS FORMULA F_EN WORKS!
+			// TODO NOW HOW THE HELL AM I GOING TO CREATE IT DYNAMICALLY...?
+			let filterFormula: string = 'OR(';
+			// let filterFormula: string =
+			// "OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh'";
+			// FIXME BELOW COPIED FROM CONSOLE WHEN ABOVE HARDCODED FILTERFOLMULA WORKED AND GAVE THE CORRECT RESULT FIXME
+			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
+			// FIXME BELOW COPIED FROM CONSOLE WHEN DYNAMICALLY GENERATED FILTERFORMULA FAILED/GAVE AN ERROR, BUT STILL GAVE A RESULT...? FIXME
+			// NOTE LOOKS LIKE THE ERRORS ARE A RESULT OF A RERENDER SENDING ANOTHER REQUEST WITH AN UNBUILT FILTERFORMULA RESULTING IN A FAILED FETCH. FilterFormula on console was 'O)'
+			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
 
+			// "OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh'")
+			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH',RECORD_ID() = 'rectGHWsZVmkeRwGh',)
+			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
+
+			if (classIds) {
+				// classIds.map(id => return {})
+				classIds.forEach((id) => {
+					// console.log(id);
+					//CMNTtwo
+					filterFormula += `RECORD_ID() = '${id}', `;
+					// filterFormula += 'RECORD_ID() = ' + 'id' + ',';
+					// arrayOfFilterFormulas.push('Name' + '='`${id}` + '');
+					//CMNT
+					// arrayOfFilterFormulas.push(`RECORD_ID() = ${id}`);
+				});
+				filterFormula = filterFormula.slice(0, -2);
+				filterFormula += ')';
+				// filterFormula += '")';
+			}
+			console.log(filterFormula);
+			// OR({id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’{id}=‘xxx’,{id}=‘xxx’{id}=‘xxx’{id}=‘xxx’
+			// "OR({Name} = '')"
+
+			console.log(arrayOfFilterFormulas);
 			const classData = await base('Classes')
 				.select({
-					filterByFormula: `OR('${arrayOfFilterFormulas}')`,
+					filterByFormula: filterFormula,
+					// filterByFormula: `OR('${arrayOfFilterFormulas}')`,
 				})
 				.firstPage();
-
 			console.log(classData);
-			console.log(arrayOfFilterFormulas);
 
 			const extractClassData = classData.map((data: any) => {
 				return {
@@ -115,10 +150,6 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 					students: data.fields.Students,
 				};
 			});
-
-			const allStudents: string[] = []
-
-			for(const i )
 
 			return extractClassData;
 		};
@@ -136,9 +167,9 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 //FIXME This approach would fetch the student data for EACH class
 // Meaning an API call for ecery class we want to display.
 // That means we will exceed the 3 API call limit per login
-export const fetchStudentsPerClassData = (arrayOfStudentIds: string[]) => {
+export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 	return async (dispatch: any) => {
-		const getStudentsPerClassData = async () => {
+		const getAllStudentsData = async () => {
 			console.log(arrayOfStudentIds);
 			const Airtable = require('airtable');
 
@@ -156,7 +187,7 @@ export const fetchStudentsPerClassData = (arrayOfStudentIds: string[]) => {
 				});
 			}
 
-			const studentData = await base('Classes')
+			const studentData = await base('Students')
 				.select({
 					filterByFormula: `OR('${arrayOfFilterFormulas}')`,
 				})
@@ -167,9 +198,8 @@ export const fetchStudentsPerClassData = (arrayOfStudentIds: string[]) => {
 
 			const extractStudentData = studentData.map((data: any) => {
 				return {
-					classId: data.id,
-					classCode: data.fields.Name,
-					students: data.fields.Students,
+					name: data.fields.Name,
+					studentClasses: data.fields.Classes,
 				};
 			});
 
@@ -177,9 +207,11 @@ export const fetchStudentsPerClassData = (arrayOfStudentIds: string[]) => {
 		};
 
 		try {
-			const fetchedClasses = await getStudentsPerClassData();
-			dispatch(projectSlice.actions.SET_STUDENT_CLASSES(fetchedClasses));
-			console.log(fetchedClasses);
+			const fetchedStudentData = await getAllStudentsData();
+			dispatch(
+				projectSlice.actions.SET_STUDENTS_DATA(fetchedStudentData)
+			);
+			console.log(fetchedStudentData);
 		} catch (error) {
 			console.log(error);
 		}

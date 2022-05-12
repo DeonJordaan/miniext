@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchClassData } from '../store/project-slice';
+import { fetchClassData, fetchAllStudentsData } from '../store/project-slice';
 import Class from '../types/class';
 
-import classes from './ClassDetail.module.css';
+// import classes from './ClassDetail.module.css';
 import ClassItem from './ClassItem';
 
 const ClassDetail = () => {
@@ -17,16 +17,30 @@ const ClassDetail = () => {
 	);
 
 	useEffect(() => {
+		console.log(classesToFetch);
 		dispatch(fetchClassData(classesToFetch));
 	}, [classesToFetch, dispatch]);
 
-	// useEffect(() => {
-	// 	dispatch(fetchClassData(classesToFetch));
-	// }, [classesToFetch, dispatch]);
+	useEffect(() => {
+		console.log(studentClasses);
+		const allStudents: any[] = [];
+
+		for (const i of studentClasses) {
+			allStudents.push(...i.students);
+		}
+		console.log(allStudents);
+		const duplicatesRemovedFromAllStudents = new Set(allStudents);
+		const finalStudentIdArray = Array.from(
+			duplicatesRemovedFromAllStudents
+		);
+
+		// CMNT
+		// dispatch(fetchAllStudentsData(finalStudentIdArray));
+	}, [studentClasses, dispatch]);
 
 	if (studentClasses.length > 0) {
 		ClassDetailContent = (
-			<div className={classes['class-detail']}>
+			<div>
 				{studentClasses.map((item: Class) => (
 					<ClassItem
 						key={item.classId}
