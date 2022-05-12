@@ -12,22 +12,17 @@ const ClassDetail = () => {
 
 	const dispatch = useAppDispatch();
 
-	const { currentStudent, studentClasses } = useAppSelector(
+	const { classesToFetch, studentClasses } = useAppSelector(
 		(state) => state.project
 	);
 
-	console.log(currentStudent);
-
 	useEffect(() => {
-		let classesToFetch: string[] = [];
-		if (currentStudent) {
-			classesToFetch = currentStudent!.map((a) => a.studentClasses);
-			// const { studentClasses: classesToFetch } = currentStudent[0];
-		}
 		dispatch(fetchClassData(classesToFetch));
-		console.log(classesToFetch);
-		console.log(currentStudent[0]?.studentClasses);
-	}, [currentStudent, dispatch]);
+	}, [classesToFetch, dispatch]);
+
+	// useEffect(() => {
+	// 	dispatch(fetchClassData(classesToFetch));
+	// }, [classesToFetch, dispatch]);
 
 	if (studentClasses.length > 0) {
 		ClassDetailContent = (
