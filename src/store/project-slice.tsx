@@ -8,7 +8,7 @@ interface ProjectState {
 	currentStudent: Student[];
 	classesToFetch: string[];
 	studentClasses: Class[];
-	studentsData: Student[];
+	studentsData: {};
 	//TODO Class & its students names
 }
 
@@ -17,7 +17,7 @@ const initialProjectState: ProjectState = {
 	currentStudent: [],
 	classesToFetch: [],
 	studentClasses: [],
-	studentsData: [],
+	studentsData: {},
 };
 
 const projectSlice = createSlice({
@@ -77,9 +77,6 @@ export const fetchStudentData = (student: string) => {
 					fetchedStudent[0].studentClasses
 				)
 			);
-			console.log(fetchedStudent);
-			console.log(fetchedStudent[0].studentClasses);
-			// fetchClassData();
 		} catch (error) {
 			console.log(error);
 		}
@@ -96,52 +93,22 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
 
 			const classIds = arrayOfClassIds;
-			console.log(classIds);
 
-			let arrayOfFilterFormulas: string[] = [];
-
-			// CMNT THIS FORMULA F_EN WORKS!
-			// TODO NOW HOW THE HELL AM I GOING TO CREATE IT DYNAMICALLY...?
-			let filterFormula: string = 'OR(';
-			// let filterFormula: string =
-			// "OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh'";
-			// FIXME BELOW COPIED FROM CONSOLE WHEN ABOVE HARDCODED FILTERFOLMULA WORKED AND GAVE THE CORRECT RESULT FIXME
-			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
-			// FIXME BELOW COPIED FROM CONSOLE WHEN DYNAMICALLY GENERATED FILTERFORMULA FAILED/GAVE AN ERROR, BUT STILL GAVE A RESULT...? FIXME
-			// NOTE LOOKS LIKE THE ERRORS ARE A RESULT OF A RERENDER SENDING ANOTHER REQUEST WITH AN UNBUILT FILTERFORMULA RESULTING IN A FAILED FETCH. FilterFormula on console was 'O)'
-			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
-
-			// "OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh'")
-			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH',RECORD_ID() = 'rectGHWsZVmkeRwGh',)
-			//  OR(RECORD_ID() = 'recr0DOF3YWjN9wAH', RECORD_ID() = 'rectGHWsZVmkeRwGh')
+			let arrayOfFilterFormulas: string = 'OR(';
 
 			if (classIds) {
-				// classIds.map(id => return {})
 				classIds.forEach((id) => {
-					// console.log(id);
-					//CMNTtwo
-					filterFormula += `RECORD_ID() = '${id}', `;
-					// filterFormula += 'RECORD_ID() = ' + 'id' + ',';
-					// arrayOfFilterFormulas.push('Name' + '='`${id}` + '');
-					//CMNT
-					// arrayOfFilterFormulas.push(`RECORD_ID() = ${id}`);
+					arrayOfFilterFormulas += `RECORD_ID() = '${id}', `;
 				});
-				filterFormula = filterFormula.slice(0, -2);
-				filterFormula += ')';
-				// filterFormula += '")';
+				arrayOfFilterFormulas = arrayOfFilterFormulas.slice(0, -2);
+				arrayOfFilterFormulas += ')';
 			}
-			console.log(filterFormula);
-			// OR({id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’,{id}=‘xxx’{id}=‘xxx’,{id}=‘xxx’{id}=‘xxx’{id}=‘xxx’
-			// "OR({Name} = '')"
 
-			console.log(arrayOfFilterFormulas);
 			const classData = await base('Classes')
 				.select({
-					filterByFormula: filterFormula,
-					// filterByFormula: `OR('${arrayOfFilterFormulas}')`,
+					filterByFormula: arrayOfFilterFormulas,
 				})
 				.firstPage();
-			console.log(classData);
 
 			const extractClassData = classData.map((data: any) => {
 				return {
@@ -157,20 +124,16 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 		try {
 			const fetchedClasses = await getClassData();
 			dispatch(projectSlice.actions.SET_STUDENT_CLASSES(fetchedClasses));
-			console.log(fetchedClasses);
+			// console.log(fetchedClasses);
 		} catch (error) {
 			console.log(error);
 		}
 	};
 };
 
-//FIXME This approach would fetch the student data for EACH class
-// Meaning an API call for ecery class we want to display.
-// That means we will exceed the 3 API call limit per login
 export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 	return async (dispatch: any) => {
 		const getAllStudentsData = async () => {
-			console.log(arrayOfStudentIds);
 			const Airtable = require('airtable');
 
 			const base = new Airtable({
@@ -179,39 +142,46 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 
 			const studentIds = arrayOfStudentIds;
 
-			let arrayOfFilterFormulas: string[] = [];
+			let arrayOfFilterFormulas: string = 'OR(';
 
 			if (studentIds) {
 				studentIds.forEach((id) => {
-					arrayOfFilterFormulas.push(`Name = ${id}`);
+					arrayOfFilterFormulas += `RECORD_ID() = '${id}', `;
 				});
+				arrayOfFilterFormulas = arrayOfFilterFormulas.slice(0, -2);
+				arrayOfFilterFormulas += ')';
 			}
 
 			const studentData = await base('Students')
 				.select({
-					filterByFormula: `OR('${arrayOfFilterFormulas}')`,
+					filterByFormula: arrayOfFilterFormulas,
 				})
 				.firstPage();
 
-			console.log(studentData);
-			console.log(arrayOfFilterFormulas);
+			// console.log(studentData);
 
-			const extractStudentData = studentData.map((data: any) => {
-				return {
-					name: data.fields.Name,
-					studentClasses: data.fields.Classes,
-				};
-			});
+			let studentDataObject: { [key: string]: string } = {};
 
-			return extractStudentData;
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const extractStudentData: () => void = studentData.map(
+				(data: any) => {
+					const studentId: string = data.id;
+
+					studentDataObject = {
+						...studentDataObject,
+						[studentId]: data.fields.Name,
+					};
+					// eslint-disable-next-line array-callback-return
+				}
+			);
+
+			return studentDataObject;
 		};
 
 		try {
-			const fetchedStudentData = await getAllStudentsData();
-			dispatch(
-				projectSlice.actions.SET_STUDENTS_DATA(fetchedStudentData)
-			);
-			console.log(fetchedStudentData);
+			const fetchedStudents: {} = await getAllStudentsData();
+			dispatch(projectSlice.actions.SET_STUDENTS_DATA(fetchedStudents));
+			// console.log(fetchedStudents);
 		} catch (error) {
 			console.log(error);
 		}

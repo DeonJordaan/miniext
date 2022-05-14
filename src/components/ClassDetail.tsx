@@ -17,25 +17,21 @@ const ClassDetail = () => {
 	);
 
 	useEffect(() => {
-		console.log(classesToFetch);
 		dispatch(fetchClassData(classesToFetch));
 	}, [classesToFetch, dispatch]);
 
 	useEffect(() => {
-		console.log(studentClasses);
 		const allStudents: any[] = [];
 
 		for (const i of studentClasses) {
 			allStudents.push(...i.students);
 		}
-		console.log(allStudents);
 		const duplicatesRemovedFromAllStudents = new Set(allStudents);
 		const finalStudentIdArray = Array.from(
 			duplicatesRemovedFromAllStudents
 		);
 
-		// CMNT
-		// dispatch(fetchAllStudentsData(finalStudentIdArray));
+		dispatch(fetchAllStudentsData(finalStudentIdArray));
 	}, [studentClasses, dispatch]);
 
 	if (studentClasses.length > 0) {
@@ -45,7 +41,7 @@ const ClassDetail = () => {
 					<ClassItem
 						key={item.classId}
 						classCode={item.classCode}
-						students={item.students}
+						studentIds={item.students}
 					/>
 				))}
 			</div>
