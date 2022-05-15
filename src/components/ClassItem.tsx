@@ -12,8 +12,6 @@ const ClassItem: React.FC<{
 
 	const receivedIds = props.studentIds;
 
-	// console.log(receivedIds);
-
 	const getStudentName = (
 		studentId: string,
 		studentObject: { [x: string]: string }
@@ -27,31 +25,19 @@ const ClassItem: React.FC<{
 
 	console.log(studentNames);
 
-	const stringifiedStudentNames = studentNames.toString();
-	// receivedIds.map((id) => {
-	// for (const i in studentsData) {
-	// return studentData[id];
-	// return studentData.{id};
-	// }
-	// });
-
-	// const studentsInEachClass = (studentIds: string{[]) => {
-	// 	for (const i of studentsData) {
-	// 		if (i.studentId === studentIds) {
-	// 			return i.name;
-	// 		}
-	// 	}
-	// };
+	const stringifiedStudentNames = studentNames
+		.toString()
+		.split(',')
+		.join(', ');
 
 	return (
-		<div className="something">
+		<div className={classes['class-detail']}>
 			<span className={classes['class-detail__heading']}>Name</span>
 			<span className={classes['class-detail__item']}>
 				{props.classCode}
 			</span>
 			<span className={classes['class-detail__heading']}>Students</span>
 			<span className={classes['class-detail__item']}>
-				{/* Jenny, Mike, Sid */}
 				{stringifiedStudentNames}
 			</span>
 		</div>

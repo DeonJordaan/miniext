@@ -39,6 +39,11 @@ const projectSlice = createSlice({
 		SET_STUDENTS_DATA(state, action) {
 			state.studentsData = action.payload;
 		},
+		RESET_ALL() {
+			return {
+				...initialProjectState,
+			};
+		},
 	},
 });
 
@@ -164,6 +169,7 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const extractStudentData: () => void = studentData.map(
+				// eslint-disable-next-line array-callback-return
 				(data: any) => {
 					const studentId: string = data.id;
 

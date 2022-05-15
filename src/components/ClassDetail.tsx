@@ -1,10 +1,14 @@
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchClassData, fetchAllStudentsData } from '../store/project-slice';
+import {
+	fetchClassData,
+	fetchAllStudentsData,
+	projectActions,
+} from '../store/project-slice';
 import Class from '../types/class';
 
-// import classes from './ClassDetail.module.css';
+import classes from './ClassDetail.module.css';
 import ClassItem from './ClassItem';
 
 const ClassDetail = () => {
@@ -48,7 +52,23 @@ const ClassDetail = () => {
 		);
 	}
 
-	return <>{ClassDetailContent}</>;
+	const logoutHandler = () => {
+		dispatch(projectActions.IS_LOGGED_IN());
+		dispatch(projectActions.RESET_ALL());
+	};
+
+	return (
+		<Fragment>
+			<button
+				className={classes.logout}
+				type="button"
+				onClick={logoutHandler}
+			>
+				Logout
+			</button>
+			{ClassDetailContent}
+		</Fragment>
+	);
 };
 
 export default ClassDetail;
