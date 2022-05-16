@@ -5,6 +5,7 @@ import Student from '../types/student';
 
 interface ProjectState {
 	isLoggedIn: boolean;
+	isLoading: boolean;
 	currentStudent: Student[];
 	classesToFetch: string[];
 	studentClasses: Class[];
@@ -14,6 +15,7 @@ interface ProjectState {
 
 const initialProjectState: ProjectState = {
 	isLoggedIn: false,
+	isLoading: false,
 	currentStudent: [],
 	classesToFetch: [],
 	studentClasses: [],
@@ -26,6 +28,9 @@ const projectSlice = createSlice({
 	reducers: {
 		IS_LOGGED_IN(state) {
 			state.isLoggedIn = !state.isLoggedIn;
+		},
+		SET_IS_LOADING(state) {
+			state.isLoading = !state.isLoading;
 		},
 		SET_CURRENT_STUDENT(state, action: PayloadAction<Student[]>) {
 			state.currentStudent = action.payload;
@@ -52,6 +57,8 @@ const projectSlice = createSlice({
 export const fetchStudentData = (student: string) => {
 	return async (dispatch: any) => {
 		const getStudentData = async () => {
+			dispatch(projectActions.SET_IS_LOADING());
+
 			const Airtable = require('airtable');
 
 			const base = new Airtable({
@@ -59,10 +66,13 @@ export const fetchStudentData = (student: string) => {
 			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
 
 			const studentName = student;
+			console.log(studentName);
 
 			const studentData = await base('Students')
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
+
+			console.log(studentData);
 
 			const extractStudentData = studentData.map((data: any) => {
 				return {
@@ -71,15 +81,19 @@ export const fetchStudentData = (student: string) => {
 				};
 			});
 
+			console.log(extractStudentData);
+
+			dispatch(projectActions.SET_IS_LOADING());
 			return extractStudentData;
 		};
 
 		try {
 			const fetchedStudent = await getStudentData();
 			dispatch(projectSlice.actions.SET_CURRENT_STUDENT(fetchedStudent));
+			console.log(fetchedStudent);
 			dispatch(
 				projectSlice.actions.SET_CLASSES_TO_FETCH(
-					fetchedStudent[0].studentClasses
+					fetchedStudent[1].studentClasses
 				)
 			);
 		} catch (error) {

@@ -16,9 +16,13 @@ const ClassDetail = () => {
 
 	const dispatch = useAppDispatch();
 
-	const { classesToFetch, studentClasses } = useAppSelector(
+	const { classesToFetch, studentClasses, isLoading } = useAppSelector(
 		(state) => state.project
 	);
+
+	if (isLoading) {
+		ClassDetailContent = <p>Loading...</p>;
+	}
 
 	useEffect(() => {
 		dispatch(fetchClassData(classesToFetch));
