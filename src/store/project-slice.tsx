@@ -69,16 +69,20 @@ export const fetchStudentData = (student: string) => {
 			console.log(studentName);
 
 			const studentData = await base('Students')
-				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
+				.select({
+					filterByFormula: `IF({Name} = '${studentName}', 'true', 'false')`,
+				})
+				// .select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
 
 			console.log(studentData);
 
-			const extractStudentData = studentData.map((data: any) => {
-				return {
-					name: data.fields.Name,
-					studentClasses: data.fields.Classes,
-				};
+			const extractStudentData = studentData.filter((data: any) => {
+				if (data.fields.Name === studentName)
+					return {
+						name: data.fields.Name,
+						studentClasses: data.fields.Classes,
+					};
 			});
 
 			console.log(extractStudentData);
@@ -93,7 +97,7 @@ export const fetchStudentData = (student: string) => {
 			console.log(fetchedStudent);
 			dispatch(
 				projectSlice.actions.SET_CLASSES_TO_FETCH(
-					fetchedStudent[1].studentClasses
+					fetchedStudent[0].studentClasses
 				)
 			);
 		} catch (error) {
