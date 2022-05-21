@@ -5,6 +5,8 @@ import { fetchStudentData, projectActions } from '../store/project-slice';
 import classes from './Login.module.css';
 
 const Login: React.FC = () => {
+	// CMNT
+	console.log('LOGIN');
 	const dispatch = useAppDispatch();
 
 	const {
@@ -30,7 +32,6 @@ const Login: React.FC = () => {
 
 		dispatch(projectActions.IS_LOGGED_IN());
 		dispatch(fetchStudentData(studentName));
-		console.log(studentName);
 		formReset();
 	};
 

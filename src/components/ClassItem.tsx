@@ -6,6 +6,8 @@ const ClassItem: React.FC<{
 	classCode: string;
 	studentIds: string[];
 }> = (props) => {
+	//CMNT
+	console.log('CLASSITEM');
 	const { studentsData } = useAppSelector((state) => state.project);
 
 	const studentData = studentsData;
@@ -22,8 +24,6 @@ const ClassItem: React.FC<{
 	const studentNames = receivedIds.map((id) => {
 		return getStudentName(id, studentData);
 	});
-
-	console.log(studentNames);
 
 	const stringifiedStudentNames = studentNames
 		.toString()

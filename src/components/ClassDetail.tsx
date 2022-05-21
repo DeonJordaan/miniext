@@ -12,6 +12,8 @@ import classes from './ClassDetail.module.css';
 import ClassItem from './ClassItem';
 
 const ClassDetail = () => {
+	//CMNT
+	console.log('CLASSDETAIL');
 	let ClassDetailContent = <p>No data to display</p>;
 
 	const dispatch = useAppDispatch();

@@ -10,7 +10,6 @@ interface ProjectState {
 	classesToFetch: string[];
 	studentClasses: Class[];
 	studentsData: {};
-	//TODO Class & its students names
 }
 
 const initialProjectState: ProjectState = {
@@ -52,8 +51,6 @@ const projectSlice = createSlice({
 	},
 });
 
-// FIXME TESTING THE NAME 'JOE JAMES RESULTED IN THE QUERY RETURNING RESULTS FOR BOTH HE AND 'JOE'
-// TODO...COULD I USE FIND IN THIS WAY TO FIND ALL MY CLASSES...? MUST TEST
 export const fetchStudentData = (student: string) => {
 	return async (dispatch: any) => {
 		const getStudentData = async () => {
@@ -66,26 +63,19 @@ export const fetchStudentData = (student: string) => {
 			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
 
 			const studentName = student;
-			console.log(studentName);
 
 			const studentData = await base('Students')
-				.select({
-					filterByFormula: `IF({Name} = '${studentName}', 'true', 'false')`,
-				})
-				// .select({ filterByFormula: `FIND(Name, '${studentName}')` })
+				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
 
-			console.log(studentData);
-
-			const extractStudentData = studentData.filter((data: any) => {
-				if (data.fields.Name === studentName)
+			const extractStudentData = studentData
+				.filter((student: any) => student.fields.Name === studentName)
+				.map((data: any) => {
 					return {
 						name: data.fields.Name,
 						studentClasses: data.fields.Classes,
 					};
-			});
-
-			console.log(extractStudentData);
+				});
 
 			dispatch(projectActions.SET_IS_LOADING());
 			return extractStudentData;
@@ -95,13 +85,18 @@ export const fetchStudentData = (student: string) => {
 			const fetchedStudent = await getStudentData();
 			dispatch(projectSlice.actions.SET_CURRENT_STUDENT(fetchedStudent));
 			console.log(fetchedStudent);
-			dispatch(
-				projectSlice.actions.SET_CLASSES_TO_FETCH(
-					fetchedStudent[0].studentClasses
-				)
-			);
+			if (fetchedStudent.length > 0) {
+				dispatch(
+					projectSlice.actions.SET_CLASSES_TO_FETCH(
+						fetchedStudent[0].studentClasses
+					)
+				);
+			}
 		} catch (error) {
-			console.log(error);
+			if (error instanceof Error) {
+				alert('Unable to fetch student data');
+				console.log(error);
+			}
 		}
 	};
 };
@@ -147,9 +142,11 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 		try {
 			const fetchedClasses = await getClassData();
 			dispatch(projectSlice.actions.SET_STUDENT_CLASSES(fetchedClasses));
-			// console.log(fetchedClasses);
 		} catch (error) {
-			console.log(error);
+			if (error instanceof Error) {
+				alert('Unable to fetch classes data');
+				console.log(error);
+			}
 		}
 	};
 };
@@ -181,8 +178,6 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 				})
 				.firstPage();
 
-			// console.log(studentData);
-
 			let studentDataObject: { [key: string]: string } = {};
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -195,7 +190,6 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 						...studentDataObject,
 						[studentId]: data.fields.Name,
 					};
-					// eslint-disable-next-line array-callback-return
 				}
 			);
 
@@ -205,9 +199,11 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 		try {
 			const fetchedStudents: {} = await getAllStudentsData();
 			dispatch(projectSlice.actions.SET_STUDENTS_DATA(fetchedStudents));
-			// console.log(fetchedStudents);
 		} catch (error) {
-			console.log(error);
+			if (error instanceof Error) {
+				alert('Unable to fetch student data for this class');
+				console.log(error);
+			}
 		}
 	};
 };
