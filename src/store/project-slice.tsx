@@ -67,24 +67,44 @@ export const fetchStudentData = (student: string) => {
 			const studentData = await base('Students')
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
+			console.log(studentData);
 
-			const extractStudentData = studentData
-				.filter((student: any) => student.fields.Name === studentName)
-				.map((data: any) => {
-					return {
-						name: data.fields.Name,
-						studentClasses: data.fields.Classes,
-					};
-				});
+			function testStudentData(data) {
+				let studentStuff;
+				if (data.length > 1) {
+					studentStuff = data
+						.filter(
+							(student: any) =>
+								student.fields.Name === studentName
+						)
+						.map((data: any) => {
+							return {
+								name: data.fields.Name,
+								studentClasses: data.fields.Classes,
+							};
+						});
+				}
+				return studentStuff;
+			}
+
+			// const extractStudentData: Student[] = studentData
+			// 	.filter((student: any) => student.fields.Name === studentName)
+			// 	.map((data: any) => {
+			// 		return {
+			// 			name: data.fields.Name,
+			// 			studentClasses: data.fields.Classes,
+			// 		};
+			// 	});
 
 			dispatch(projectActions.SET_IS_LOADING());
-			return extractStudentData;
+			return testStudentData(studentData);
+			// return extractStudentData;
 		};
 
 		try {
 			const fetchedStudent = await getStudentData();
 			dispatch(projectSlice.actions.SET_CURRENT_STUDENT(fetchedStudent));
-			console.log(fetchedStudent);
+
 			if (fetchedStudent.length > 0) {
 				dispatch(
 					projectSlice.actions.SET_CLASSES_TO_FETCH(
@@ -94,9 +114,11 @@ export const fetchStudentData = (student: string) => {
 			}
 		} catch (error) {
 			if (error instanceof Error) {
-				alert('Unable to fetch student data');
+				alert(error.message);
 				console.log(error);
 			}
+			// dispatch(projectActions.SET_IS_LOADING());
+			dispatch(projectActions.IS_LOGGED_IN());
 		}
 	};
 };
