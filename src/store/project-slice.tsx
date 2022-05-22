@@ -69,36 +69,30 @@ export const fetchStudentData = (student: string) => {
 				.firstPage();
 			console.log(studentData);
 
-			function testStudentData(data) {
-				let studentStuff;
-				if (data.length > 1) {
-					studentStuff = data
-						.filter(
-							(student: any) =>
-								student.fields.Name === studentName
-						)
-						.map((data: any) => {
-							return {
-								name: data.fields.Name,
-								studentClasses: data.fields.Classes,
-							};
-						});
-				}
-				return studentStuff;
+			const adjustString = (string: string) => {
+				let newString = string.replaceAll(' ', '').toLowerCase();
+				return newString;
+			};
+
+			let correctStudent: Student[];
+
+			if (studentData.length > 1) {
+				correctStudent = studentData.filter(
+					adjustString(studentName) ===
+						adjustString(studentData.fields.Name)
+				);
+				return correctStudent;
 			}
 
-			// const extractStudentData: Student[] = studentData
-			// 	.filter((student: any) => student.fields.Name === studentName)
-			// 	.map((data: any) => {
-			// 		return {
-			// 			name: data.fields.Name,
-			// 			studentClasses: data.fields.Classes,
-			// 		};
-			// 	});
+			const extractedStudentData = correctStudent!.map((data: any) => {
+				return {
+					name: data.fields.Name,
+					studentClasses: data.fields.Classes,
+				};
+			});
 
 			dispatch(projectActions.SET_IS_LOADING());
-			return testStudentData(studentData);
-			// return extractStudentData;
+			return extractedStudentData;
 		};
 
 		try {
