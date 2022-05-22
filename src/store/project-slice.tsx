@@ -6,7 +6,7 @@ import Student from '../types/student';
 interface ProjectState {
 	isLoggedIn: boolean;
 	isLoading: boolean;
-	currentStudent: Student[];
+	currentStudent: Student[] | undefined;
 	classesToFetch: string[];
 	studentClasses: Class[];
 	studentsData: {};
@@ -70,19 +70,37 @@ export const fetchStudentData = (student: string) => {
 			console.log(studentData);
 
 			const adjustString = (string: string) => {
-				let newString = string.replaceAll(' ', '').toLowerCase();
+				let newString = string?.replaceAll(' ', '').toLowerCase();
 				return newString;
 			};
 
-			let correctStudent: Student[];
+			const studentDataReceived = studentData;
+			console.log(studentDataReceived);
 
-			if (studentData.length > 1) {
-				correctStudent = studentData.filter(
-					adjustString(studentName) ===
-						adjustString(studentData.fields.Name)
+			let correctStudent: Student[] | undefined;
+
+			if (studentData && studentData.length > 1) {
+				correctStudent = studentData.map(
+					(student: any) => {
+						if (
+							adjustString(studentName) ===
+							adjustString(studentDataReceived.fields.Name)
+						) {
+							return student;
+						}
+						return student;
+					}
+					// correctStudent = studentData.filter(
+					// 	adjustString(studentName) ===
+					// 		adjustString(studentDataReceived.fields.Name)
 				);
-				return correctStudent;
+				console.log(correctStudent);
+				return;
+			} else {
+				correctStudent = studentData;
 			}
+
+			console.log(correctStudent);
 
 			const extractedStudentData = correctStudent!.map((data: any) => {
 				return {
@@ -97,9 +115,11 @@ export const fetchStudentData = (student: string) => {
 
 		try {
 			const fetchedStudent = await getStudentData();
-			dispatch(projectSlice.actions.SET_CURRENT_STUDENT(fetchedStudent));
 
-			if (fetchedStudent.length > 0) {
+			if (fetchedStudent && fetchedStudent.length > 0) {
+				dispatch(
+					projectSlice.actions.SET_CURRENT_STUDENT(fetchedStudent)
+				);
 				dispatch(
 					projectSlice.actions.SET_CLASSES_TO_FETCH(
 						fetchedStudent[0].studentClasses
@@ -111,7 +131,6 @@ export const fetchStudentData = (student: string) => {
 				alert(error.message);
 				console.log(error);
 			}
-			// dispatch(projectActions.SET_IS_LOADING());
 			dispatch(projectActions.IS_LOGGED_IN());
 		}
 	};
