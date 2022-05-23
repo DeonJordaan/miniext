@@ -63,7 +63,6 @@ export const fetchStudentData = (student: string) => {
 			const studentData = await dBase('Students')
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
-			console.log(studentData);
 
 			const extractStudentData = studentData.map((data: any) => {
 				return {
@@ -72,20 +71,19 @@ export const fetchStudentData = (student: string) => {
 				};
 			});
 
-			console.log(extractStudentData);
-
 			let filteredStudent: Student[] | undefined;
 
-			if (extractStudentData.length > 0) {
+			if (extractStudentData.length > 1) {
 				filteredStudent = extractStudentData.filter(function (
 					el: Student
 				) {
 					return el.name === studentName;
 				});
+			} else {
+				filteredStudent = extractStudentData;
 			}
 
 			dispatch(projectActions.SET_IS_LOADING());
-			console.log(filteredStudent);
 			return filteredStudent;
 		};
 
