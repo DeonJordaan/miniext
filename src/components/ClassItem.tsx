@@ -12,8 +12,10 @@ const ClassItem: React.FC<{
 
 	const studentData = studentsData;
 
+	// Receive all student IDs required for this class component.
 	const receivedIds = props.studentIds;
 
+	// Connect student ID received from props to student data/name from state.
 	const getStudentName = (
 		studentId: string,
 		studentObject: { [x: string]: string }
@@ -25,6 +27,7 @@ const ClassItem: React.FC<{
 		return getStudentName(id, studentData);
 	});
 
+	// Convert studentNames array into string for display purposes
 	const stringifiedStudentNames = studentNames
 		.toString()
 		.split(',')

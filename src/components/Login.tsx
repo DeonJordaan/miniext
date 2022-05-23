@@ -1,7 +1,9 @@
 import React from 'react';
 import useInput from '../hooks/useInput';
 import { useAppDispatch } from '../store/hooks';
+
 import { fetchStudentData, projectActions } from '../store/project-slice';
+
 import classes from './Login.module.css';
 
 const Login: React.FC = () => {
@@ -9,6 +11,7 @@ const Login: React.FC = () => {
 	console.log('LOGIN');
 	const dispatch = useAppDispatch();
 
+	// Receive & process user input with custom hook.
 	const {
 		value: studentName,
 		isValid: studentNameIsValid,
@@ -31,6 +34,7 @@ const Login: React.FC = () => {
 		}
 
 		dispatch(projectActions.IS_LOGGED_IN());
+		// Initiate fetching of login student data.
 		dispatch(fetchStudentData(studentName));
 		formReset();
 	};

@@ -53,6 +53,7 @@ const projectSlice = createSlice({
 	},
 });
 
+// Fetch the login student's data.
 export const fetchStudentData = (student: string) => {
 	return async (dispatch: any) => {
 		const getStudentData = async () => {
@@ -64,6 +65,7 @@ export const fetchStudentData = (student: string) => {
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
 
+			// Extract student data from data retrieved.
 			const extractStudentData = studentData.map((data: any) => {
 				return {
 					name: data.fields.Name,
@@ -71,6 +73,8 @@ export const fetchStudentData = (student: string) => {
 				};
 			});
 
+			// Account for overlapping results, as in this case fetching Joe James' data returns both his and Joe's.
+			// Filter out the results that don't match the user entered data exactly.
 			let filteredStudent: Student[] | undefined;
 
 			if (extractStudentData.length > 1) {
@@ -79,6 +83,8 @@ export const fetchStudentData = (student: string) => {
 				) {
 					return el.name === studentName;
 				});
+			} else if (extractStudentData.length <= 0) {
+				throw new Error('No student data received');
 			} else {
 				filteredStudent = extractStudentData;
 			}
@@ -110,11 +116,13 @@ export const fetchStudentData = (student: string) => {
 	};
 };
 
+// Fetch all class data for the login student's classes.
 export const fetchClassData = (arrayOfClassIds: string[]) => {
 	return async (dispatch: any) => {
 		const getClassData = async () => {
 			const classIds = arrayOfClassIds;
 
+			// Dynamically construct the filter formula, depending on the classes that need to be fetched for each login student.
 			let arrayOfFilterFormulas: string = 'OR(';
 
 			if (classIds) {
@@ -144,6 +152,7 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 
 		try {
 			const fetchedClasses = await getClassData();
+
 			dispatch(projectSlice.actions.SET_STUDENT_CLASSES(fetchedClasses));
 		} catch (error) {
 			if (error instanceof Error) {
@@ -154,6 +163,7 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 	};
 };
 
+// Fetch student data in order to populate all students in each displayed class.
 export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 	return async (dispatch: any) => {
 		const getAllStudentsData = async () => {
@@ -175,6 +185,7 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 				})
 				.firstPage();
 
+			// Create student data object to assign each student name to their Airtable ID.
 			let studentDataObject: { [key: string]: string } = {};
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -195,6 +206,7 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 
 		try {
 			const fetchedStudents: {} = await getAllStudentsData();
+
 			dispatch(projectSlice.actions.SET_STUDENTS_DATA(fetchedStudents));
 		} catch (error) {
 			if (error instanceof Error) {
@@ -208,38 +220,3 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 export const projectActions = projectSlice.actions;
 
 export default projectSlice;
-
-// ATTEMPTING CUSTOM USEAIRTABLE HOOK
-// export const fetchStudentData = (student: string) => {
-// 	return async (dispatch: any) => {
-// 		const { sendRequest: fetchStudent } = FetchAirtable();
-// 		// const { isLoading, error, sendRequest: fetchStudent } = useAirtable();
-
-// 		const getStudentData = (studentData: any[]) => {
-// 			const extractedStudentData = studentData.map((data) => {
-// 				return {
-// 					name: data.fields.Name,
-// 					classes: data.fields.Classes,
-// 				};
-// 			});
-
-// 			// return extractStudentData;
-// 			dispatch(
-// 				projectSlice.actions.SET_CURRENT_STUDENT(extractedStudentData)
-// 			);
-// 		};
-
-// 		// const currentStudent = await getStudentData();
-
-// 		fetchStudent(
-// 			{
-// 				apiKey: process.env.REACT_APP_AIRTABLE_API_KEY,
-// 				baseId: process.env.REACT_APP_AIRTABLE_BASE_ID,
-// 				queryData: student,
-// 				queryField: 'Name',
-// 				baseName: 'Students',
-// 			},
-// 			getStudentData
-// 		);
-// 	};
-// };
