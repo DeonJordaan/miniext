@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import dBase from './airtable';
+
 import Class from '../types/class';
 import Student from '../types/student';
 
@@ -56,61 +58,35 @@ export const fetchStudentData = (student: string) => {
 		const getStudentData = async () => {
 			dispatch(projectActions.SET_IS_LOADING());
 
-			const Airtable = require('airtable');
-
-			const base = new Airtable({
-				apiKey: process.env.REACT_APP_AIRTABLE_API_KEY,
-			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
-
 			const studentName = student;
 
-			const studentData = await base('Students')
+			const studentData = await dBase('Students')
 				.select({ filterByFormula: `FIND(Name, '${studentName}')` })
 				.firstPage();
 			console.log(studentData);
 
-			const adjustString = (string: string) => {
-				let newString = string?.replaceAll(' ', '').toLowerCase();
-				return newString;
-			};
-
-			const studentDataReceived = studentData;
-			console.log(studentDataReceived);
-
-			let correctStudent: Student[] | undefined;
-
-			if (studentData && studentData.length > 1) {
-				correctStudent = studentData.map(
-					(student: any) => {
-						if (
-							adjustString(studentName) ===
-							adjustString(studentDataReceived.fields.Name)
-						) {
-							return student;
-						}
-						return student;
-					}
-					// correctStudent = studentData.filter(
-					// 	adjustString(studentName) ===
-					// 		adjustString(studentDataReceived.fields.Name)
-				);
-				console.log(correctStudent);
-				return;
-			} else {
-				correctStudent = studentData;
-			}
-
-			console.log(correctStudent);
-
-			const extractedStudentData = correctStudent!.map((data: any) => {
+			const extractStudentData = studentData.map((data: any) => {
 				return {
 					name: data.fields.Name,
 					studentClasses: data.fields.Classes,
 				};
 			});
 
+			console.log(extractStudentData);
+
+			let filteredStudent: Student[] | undefined;
+
+			if (extractStudentData.length > 0) {
+				filteredStudent = extractStudentData.filter(function (
+					el: Student
+				) {
+					return el.name === studentName;
+				});
+			}
+
 			dispatch(projectActions.SET_IS_LOADING());
-			return extractedStudentData;
+			console.log(filteredStudent);
+			return filteredStudent;
 		};
 
 		try {
@@ -139,12 +115,6 @@ export const fetchStudentData = (student: string) => {
 export const fetchClassData = (arrayOfClassIds: string[]) => {
 	return async (dispatch: any) => {
 		const getClassData = async () => {
-			const Airtable = require('airtable');
-
-			const base = new Airtable({
-				apiKey: process.env.REACT_APP_AIRTABLE_API_KEY,
-			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
-
 			const classIds = arrayOfClassIds;
 
 			let arrayOfFilterFormulas: string = 'OR(';
@@ -157,7 +127,7 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 				arrayOfFilterFormulas += ')';
 			}
 
-			const classData = await base('Classes')
+			const classData = await dBase('Classes')
 				.select({
 					filterByFormula: arrayOfFilterFormulas,
 				})
@@ -189,12 +159,6 @@ export const fetchClassData = (arrayOfClassIds: string[]) => {
 export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 	return async (dispatch: any) => {
 		const getAllStudentsData = async () => {
-			const Airtable = require('airtable');
-
-			const base = new Airtable({
-				apiKey: process.env.REACT_APP_AIRTABLE_API_KEY,
-			}).base(process.env.REACT_APP_AIRTABLE_BASE_ID);
-
 			const studentIds = arrayOfStudentIds;
 
 			let arrayOfFilterFormulas: string = 'OR(';
@@ -207,7 +171,7 @@ export const fetchAllStudentsData = (arrayOfStudentIds: string[]) => {
 				arrayOfFilterFormulas += ')';
 			}
 
-			const studentData = await base('Students')
+			const studentData = await dBase('Students')
 				.select({
 					filterByFormula: arrayOfFilterFormulas,
 				})
