@@ -45,14 +45,15 @@ const Login: React.FC = () => {
 
 	return (
 		<div className={classes.login}>
-			<div className="login-input">
-				<label>Student Name:&nbsp;</label>
+			<form className="login-input">
+				<label htmlFor="studentName">Student Name:&nbsp;</label>
 				<input
+					name="studentName"
 					type="text"
 					value={studentName || ''}
 					onChange={studentNameChangeHandler}
 				/>
-			</div>
+			</form>
 			<button
 				type="button"
 				className="login-button"
