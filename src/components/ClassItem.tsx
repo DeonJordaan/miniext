@@ -34,7 +34,7 @@ const ClassItem: React.FC<{
 		.join(', ');
 
 	return (
-		<div className={classes['class-detail']}>
+		<div data-testid="class-item" className={classes['class-detail']}>
 			<span className={classes['class-detail__heading']}>Name</span>
 			<span className={classes['class-detail__item']}>
 				{props.classCode}

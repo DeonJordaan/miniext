@@ -1,10 +1,14 @@
 import { render, screen } from '../test-utils';
 import Login from './Login';
 
-test('renders login form input', () => {
+it('should render the Login form', () => {
 	render(<Login />);
-	const loginInputElement = screen.getByLabelText('Student Name:');
+
+	const loginInputElement = screen.getByRole('textbox', {
+		name: /Student Name:/i,
+	});
 	expect(loginInputElement).toBeInTheDocument();
-	const buttonElement = screen.getByText('Login');
+
+	const buttonElement = screen.getByRole('button', { name: /Login/i });
 	expect(buttonElement).toBeInTheDocument();
 });

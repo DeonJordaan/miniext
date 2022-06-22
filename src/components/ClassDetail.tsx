@@ -57,7 +57,7 @@ const ClassDetail = () => {
 	// If class data is available, render it to the display.
 	if (studentClasses.length > 0) {
 		ClassDetailContent = (
-			<div>
+			<div data-testid="class-detail">
 				{studentClasses.map((item: Class) => (
 					<ClassItem
 						key={item.classId}

@@ -1,21 +1,18 @@
-import { render, screen, waitFor } from './test-utils';
-// import { fireEvent } from './test-utils';
-
-import App from './App';
+import { render, screen } from './test-utils';
 import userEvent from '@testing-library/user-event';
 
-describe('Render ClassDetail component', () => {
-	it('should render ClassDetail when Login is clicked', async () => {
-		// render your component
-		render(<App />);
-		// access your button
-		const loginButton = screen.getByText('Login');
-		// simulate button click
-		userEvent.click(loginButton);
+import App from './App';
 
-		// expect result
-		// await waitFor(() =>
-		await screen.not.findByText('Student Name:');
-	});
-	// }
+it('should render ClassDetail when Login is clicked', async () => {
+	const jsdomAlert = window.alert;
+	window.alert = jest.fn();
+
+	render(<App />);
+
+	const loginButton = screen.getByRole('button', { name: /Login/i });
+	userEvent.click(loginButton);
+
+	screen.queryByTestId('class-detail');
+
+	window.alert = jsdomAlert;
 });
