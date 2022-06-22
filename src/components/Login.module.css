@@ -7,3 +7,7 @@
 .login button {
 	margin: 1rem auto;
 }
+
+.login input {
+	margin-left: 0.5rem;
+}
